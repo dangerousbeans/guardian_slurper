@@ -1,7 +1,29 @@
-GEM
+GIT
+  remote: git@github.com:chrsgrrtt/contentapi-ruby.git
+  revision: fd874555bb21c62550cff5d5693900a7cc954a38
   specs:
+    guardian-content (0.2.2)
+      httparty (>= 0.5.2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    httparty (0.11.0)
+      multi_json (~> 1.0)
+      multi_xml (>= 0.5.2)
+    json (1.8.0)
+    mime-types (1.23)
+    multi_json (1.7.7)
+    multi_xml (0.5.4)
+    nowa_api (0.0.1)
+      json
+      rest-client
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  guardian-content!
+  nowa_api

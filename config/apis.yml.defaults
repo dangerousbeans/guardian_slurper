@@ -1,0 +1,5 @@
+GUARDIAN_CONTENT_API_KEY: "GUARDIAN_API_KEY"
+INGENIAPI_API_KEY: "INGENIA_API_KEY"
+
+ENDPOINT: "http://api.ingeniapi.com/train"
+GUARDIAN_API: "http://content.guardianapis.com/search"

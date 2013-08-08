@@ -21,8 +21,11 @@ class Guardian
 
     results.each do |article|
       # basic info
-      title = article['webTitle']
-      text = article['fields']['body']
+      title = article['fields']['headline']
+      summary = article['fields']['standfirst']
+      body = article['fields']['body']
+
+      text = "#{title} #{body} #{summary}"
 
       # tags
       article_tags = article['tags']
@@ -30,13 +33,14 @@ class Guardian
       tag_sets = {}
       
       tags = article_tags.each do |t| 
-        tag_sets[t['type']] = [] if tag_sets[t['type']].nil?
-        tag_sets[t['type']] << t['id'] unless tag_sets[t['type']].include?(t['id'])
+        tag_set_name = t['type']
+        next unless tag_set_name == "keyword" # only record the keyword tags
+
+        tag_sets[tag_set_name] = [] if tag_sets[tag_set_name].nil?
+        tag_sets[tag_set_name] << t['id'] unless tag_sets[tag_set_name].include?(t['id'])
       end
 
-      # puts title
-      # puts tag_sets
-
+      
       RestClient.post CONFIG['ENDPOINT'], :api_key => CONFIG['INGENIAPI_API_KEY'], :text => text, :tag_sets => tag_sets.to_json do |ingenia_response|
         puts ingenia_response
       end
@@ -53,27 +57,38 @@ class Guardian
 
     puts "Page #{current_page}/#{pages}"
 
-    # handle this pages results
+    # handle this pages results and save them to ingenia
     read_results json_response['results']
 
-    if current_page < pages
-      return load(current_page + 1)
-    end
+    return pages
   end
 
   # Load results from the guardian API
-  def load page=1
-    RestClient.get CONFIG['GUARDIAN_API'], :params => { 
-          :format => 'json', 
-          :'show-fields' => 'body', 
-          :'show-tags' => 'all',
-          :'from-date' => '2010-01-01',
-          :'to-date' => '2011-01-01',
-          :page => page,
-          :'api-key' => CONFIG['GUARDIAN_CONTENT_API_KEY']
-        } do |response|
+  def load
 
-      return handle_response response
+    page = 1
+    pages = 0
+
+    loop do
+      # until done
+      RestClient.get CONFIG['GUARDIAN_API'], :params => { 
+            :format => 'json', 
+            :'show-fields' => 'headline,body,standfirst', 
+            :'show-tags' => 'all',
+            :tag => '(type/article|type/minutebyminute),publication/theguardian', # only articles | minutebyminute published by the guardian
+            :'from-date' => '2013-01-01',
+            :'to-date' => '2013-08-08',
+            :page => page,
+            :'api-key' => CONFIG['GUARDIAN_CONTENT_API_KEY']
+          } do |response|
+
+        pages = handle_response(response)
+      end
+
+      # stop
+      break if page == pages
+       
+      page = page + 1 
     end
   end
 end
